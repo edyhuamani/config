@@ -1,0 +1,65 @@
+<beans:beans xmlns="http://www.springframework.org/schema/security" xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/security
+http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <global-method-security pre-post-annotations="enabled" secured-annotations="enabled" proxy-target-class="true" />
+
+    <http use-expressions="true" auto-config="true" access-denied-page="/seguridad/acceso-denegado.htm">
+
+       <intercept-url pattern="/css/**" access="permitAll" />
+	   <intercept-url pattern="/img/**" access="permitAll" />
+	   <intercept-url pattern="/js/**" access="permitAll" />
+	   <intercept-url pattern="/opera/css/**" access="permitAll" />
+	   <intercept-url pattern="/opera/img/**" access="permitAll" />
+	   <intercept-url pattern="/opera/js/**" access="permitAll"  />
+ 
+        <intercept-url pattern="/index.htm" access="isAuthenticated()" />
+        <intercept-url pattern="/seguridad/cerrar-session.htm" access="permitAll" />
+        <intercept-url pattern="/seguridad/acceso-denegado.htm" access="permitAll" />
+        
+		<intercept-url pattern="/mantenimiento/producto/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+		<intercept-url pattern="/mantenimiento/dctomoroso/**" access="isAuthenticated() and hasRole('CLIENTE') " />
+		<intercept-url pattern="/mantenimiento/pais/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+		<intercept-url pattern="/mantenimiento/parametro/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+		<intercept-url pattern="/comun/**" access="isAuthenticated()" />
+        <intercept-url pattern="/herramientas/adminPerfiles/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/herramientas/entidades/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/procesos/cargaArchivos/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/herramientas/cargaClientesESP/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/herramientas/cargaClientesSCI/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/mantenimiento/crctr-especial/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/mantenimiento/validacionCaracterManual/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/herramientas/importacionREPCOM/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/procesos/cargaPadrones/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/mantenimiento/validacionIdentidadManual/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/procesos/exportacionHost/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/consultas/elimorososentidades/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/consultas/validenpendiente/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/herramientas/perfilUsuarios/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/consultas/registroentidades/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/consultas/registrocartera/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        <intercept-url pattern="/procesos/monitoreo/**" access="isAuthenticated() and hasRole('OPERADOR') " />
+        
+        
+        
+        <form-login login-page="/seguridad/acceso-denegado.htm" />
+        <!-- <logout invalidate-session="true" logout-success-url="/index.jsp" logout-url="/loginSecure.do?action=handleLogout" /> -->
+
+        <session-management session-fixation-protection="none" invalid-session-url="/seguridad/cerrar-session.htm">
+            <concurrency-control max-sessions="1"  />
+        </session-management>
+    </http>
+
+    <authentication-manager alias="authenticationManager" >
+          <authentication-provider ref="myAuthenticationProvider">
+          </authentication-provider>
+    </authentication-manager>
+
+    <beans:bean id="myAuthenticationProvider" class="pe.com.equifax.ecm.security.filter.CustomAuthenticationProvider"></beans:bean>
+
+    <!-- <beans:bean id="authenticationTokenProcessingFilter" class="pe.com.equifax.ecm.security.filter.AuthenticationTokenProcessingFilter" /> -->
+
+    <beans:bean id="loggerListener" class="org.springframework.security.authentication.event.LoggerListener" />
+
+</beans:beans>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans 	xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:hdiv="http://www.hdiv.org/schema/hdiv" 
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd  
+        					http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd  
+        					http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+        					http://www.hdiv.org/schema/hdiv http://www.hdiv.org/schema/hdiv/hdiv.xsd">	
+	
+	<context:annotation-config />
+	
+	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
+	
+	
+	<context:component-scan base-package="pe.com.equifax" />
+	
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" />
+		<property name="order" value="1" />
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.view.XmlViewResolver">
+		<property name="location">
+			<value>/WEB-INF/spring-excel-views.xml</value>
+		</property>
+		<property name="order" value="0" />	
+	</bean>
+	
+	
+	
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="classpath:messages"/>
+		<property name="defaultEncoding" value="UTF-8"/>
+	</bean>
+	
+	<bean id="localeSpanish"
+		class="java.util.Locale">
+	    <constructor-arg index="0" value="es"/>
+	    <constructor-arg index="1" value="ES"/> 
+	</bean>
+	
+	<bean id="defaultLocale"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="staticMethod">
+			<value>java.util.Locale.setDefault</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref local="localeSpanish" />
+			</list>
+		</property>
+	</bean>
+	
+	<!-- Bean para upload de archivos -->
+	<bean id="multipartResolver"  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- Tamanio maximo de archivo en bytes -->
+		<property name="maxUploadSize" value="10485760"/>
+	</bean>
+	
+	
+	<!-- DataSource Oracle -->
+	<bean id="dataSource" depends-on="defaultLocale" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="java:/irisDS"/>
+        <property name="cache" value="false"/>
+	    <property name="lookupOnStartup" value="false"/>
+	    <property name="proxyInterface" value="javax.sql.DataSource"/>
+    </bean>
+    
+    <!-- DataSource SQLServer -->
+    <bean id="dsSegAp" depends-on="defaultLocale" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="java:/segapDS"/>
+        <property name="cache" value="false"/>
+	    <property name="lookupOnStartup" value="false"/>
+	    <property name="proxyInterface" value="javax.sql.DataSource"/>
+    </bean>
+    
+    <!-- Administrador de transacciones para Oracle -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+      <property name="dataSource"  ref="dataSource" />    
+   </bean>
+	
+	
+	 <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+	    <property name="favorPathExtension" value="false" />
+	    <property name="favorParameter"     value="true" />
+	    <property name="parameterName"      value="mediaType" />
+	    <property name="ignoreAcceptHeader" value="true"/>
+	    <property name="useJaf"             value="false"/>
+	    <property name="defaultContentType" value="application/json" />
+	
+	    <property name="mediaTypes">
+	        <map>
+	            <entry key="json"   value="application/json" />
+	            <entry key="xml"    value="application/xml" />
+	            <entry key="excel"  value="application/vnd.ms-excel" />
+	            <entry key="html"   value="text/html" />
+	       </map>
+	    </property>
+	</bean>
+	
+	
+	<!-- HDIV Configuration 
+	
+		<hdiv:config errorPage="errorHDIV.htm" excludedExtensions="css,png,js,gif,jpg" maxPagesPerSession="200">
+			<hdiv:sessionExpired loginPage="/index.htm" homePage="/"/>
+			<hdiv:startPages method="get">/,/index.htm,/home.htm</hdiv:startPages>
+			<hdiv:startPages method="post">/j_spring_security_check,/saveProduct.htm</hdiv:startPages>			
+			<hdiv:startParameters/>
+			
+			<hdiv:paramsWithoutValidation>
+			 	<hdiv:mapping url="/getTable.htm"  
+							  parameters="currtablName,productCode,tablName"/>
+				
+			    <hdiv:mapping url="/searchProducts.htm"  
+							  parameters="prodCode,prodName"/>
+				
+				<hdiv:mapping url="/saveProduct.htm" 
+							  parameters="_chkEnabled,_chkRemove,chkEnabled,chkRemove,cmbTable,hddChkAll,hddProductId,hddTablSel,
+							  			 txtProductCode,txtProductDesc,txtProductName"/>
+							  			 
+				<hdiv:mapping url="/searchLogs.htm" 
+							  parameters="dateFrom,dateTo,docType,docValue,prodId"/>
+			
+			</hdiv:paramsWithoutValidation>
+		</hdiv:config>
+		
+		
+	-->	
+	
+</beans>

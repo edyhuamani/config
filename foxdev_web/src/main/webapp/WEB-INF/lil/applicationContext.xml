@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd">
+
+
+	<context:annotation-config />
+	<context:component-scan base-package="pe.com.equifax.solite" />
+	
+	<bean id="localeSpanish"
+		class="java.util.Locale">
+	    <constructor-arg index="0" value="es"/>
+	    <constructor-arg index="1" value="ES"/> 
+	</bean>
+
+	<bean id="defaultLocale"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="staticMethod">
+			<value>java.util.Locale.setDefault</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref local="localeSpanish" />
+			</list>
+		</property>
+	</bean>
+	
+	
+	<bean id="dataSource" depends-on="defaultLocale" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="java:/irisDS"/>
+        <property name="cache" value="false"/>
+	    <property name="lookupOnStartup" value="false"/>
+	    <property name="proxyInterface" value="javax.sql.DataSource"/>
+    </bean>
+    
+    
+    <bean id="dsSegAp" depends-on="defaultLocale" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="java:/segapDS"/>
+        <property name="cache" value="false"/>
+	    <property name="lookupOnStartup" value="false"/>
+	    <property name="proxyInterface" value="javax.sql.DataSource"/>
+    </bean>
+    
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+      <property name="dataSource"  ref="dataSource" />    
+   </bean>
+   
+</beans>

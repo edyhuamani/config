@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+  xmlns:beans="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+	<http pattern="/index.htm" security="none"/>
+	<http pattern="/resources/**" security="none" />
+	
+	<http auto-config="true">
+		<intercept-url pattern="/**" access="ROLE_USER" />
+		<access-denied-handler error-page="/index.htm"/> 
+		<form-login login-page="/index.htm" 
+					always-use-default-target="true" 
+					default-target-url="/home.htm" />
+		<logout invalidate-session="true" 
+				logout-success-url="/index.htm" 
+				logout-url="/logout" />
+	</http>
+	
+	<authentication-manager erase-credentials="false">
+	    <authentication-provider ref="soliteAuthenticationProvider"/>
+	</authentication-manager>
+	
+	<beans:bean id="soliteAuthenticationProvider" 
+				class="pe.com.equifax.solite.web.service.SoliteAuthenticationProvider" >
+	</beans:bean>
+
+	
+
+</beans:beans>

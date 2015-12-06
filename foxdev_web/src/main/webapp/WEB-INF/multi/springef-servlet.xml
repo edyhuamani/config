@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:util="http://www.springframework.org/schema/util" xmlns:camel="http://camel.apache.org/schema/spring" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xmlns:task="http://www.springframework.org/schema/task" 
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd        
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+        http://www.springframework.org/schema/tx 
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <!-- Permitimos anotaciones de configuración en Beans -->
+    <context:annotation-config />
+     <task:annotation-driven />
+    
+    <!-- Para buscar anotaciones en los paquetes siguientes -->
+    <context:component-scan base-package="pe.com.equifax.ecm" scoped-proxy="targetClass" />
+
+	
+	
+    <!-- Para que funcione el fileUpload -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="90000000" />
+    </bean>
+
+    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="java:jboss/datasources/EDYDS" />
+        <property name="lookupOnStartup" value="true" />
+        <property name="cache" value="true" />
+        <property name="proxyInterface" value="javax.sql.DataSource" />
+    </bean>
+
+    <!-- <jdbc:initialize-database data-source="dataSource"> -->
+    <!-- <jdbc:script location="classpath*:data.sql" /> -->
+    <!-- </jdbc:initialize-database> -->
+
+    <tx:annotation-driven transaction-manager="txManager" />
+   
+
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <aop:aspectj-autoproxy />
+
+    <mvc:annotation-driven />
+
+    <mvc:resources mapping="/images/**" location="/opera/img/" />
+    <mvc:resources mapping="/styles/**" location="/opera/css/" />
+    <mvc:resources mapping="/scripts/**" location="/opera/js/" />
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+        <property name="viewClass">
+            <value>
+                org.springframework.web.servlet.view.tiles3.TilesView
+            </value>
+        </property>
+    </bean>
+
+    <bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+        <property name="definitions">
+            <list>
+                <value>/WEB-INF/tiles/tiles-definitions.xml</value>
+            </list>
+        </property>
+        <property name="completeAutoload" value="true" />
+    </bean>
+
+   <!--  <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        <property name="mediaTypes">
+            <map>
+                <entry key="html" value="text/html" />
+                <entry key="json" value="application/json" />
+            </map>
+        </property>
+        <property name="viewResolvers">
+            <list>
+                <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+                    <property name="prefix" value="/WEB-INF/views/" />
+                    <property name="suffix" value=".jsp" />
+                </bean>
+            </list>
+        </property>
+        <property name="defaultViews">
+            <list>
+                <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+            </list>
+        </property>
+    </bean>
+ -->
+    <camelContext xmlns="http://camel.apache.org/schema/spring">
+        <route id="routeListeningHTTPAndRouting">
+            <from uri="file://target/upload/" />
+            <log message="Moving ${file:name} to the output directory" />
+            <to uri="bean:ExportacionHostController?method=exportacionHost2" />
+            <otherwise>
+                <to uri="file://target/unknown/" pattern="InOnly" />
+            </otherwise>
+        </route>
+    </camelContext>
+
+</beans>
